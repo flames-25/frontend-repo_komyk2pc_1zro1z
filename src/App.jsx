@@ -19,6 +19,7 @@ import {
   Crown,
   Briefcase
 } from 'lucide-react'
+import { DemoVariant1 } from '@/components/ui/demo'
 
 const brand = {
   primary: '#0A2540',
@@ -210,7 +211,8 @@ function Navbar() {
       { href: '#aktivitas', label: 'Aktivitas' },
       { href: '#mitra', label: 'Mitra' },
       { href: '#testimoni', label: 'Testimoni' },
-      { href: '#output', label: 'Output' }
+      { href: '#output', label: 'Output' },
+      { href: '#demo-bg', label: 'Demo BG' }
     ],
     []
   )
@@ -300,7 +302,7 @@ function Hero() {
         </motion.div>
       </Container>
 
-      <motion.a href="#daftar" className="group fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full px-5 py-3 font-semibold text-[#0A2540] bg-[#F2C335] shadow-xl" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }}>
+      <motion.a href="#daftar" className="group fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full px-5 py-3 font-semibold text[#0A2540] bg-[#F2C335] shadow-xl" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.5 }}>
         <span className="absolute inset-0 rounded-full blur-md opacity-60 bg-[#F2C335]" />
         <span className="relative">Daftar Sekarang</span>
         <ArrowRight className="w-4 h-4 relative" />
@@ -690,6 +692,10 @@ export default function App() {
       <ScrollProgressBar />
       <Navbar />
       <main className="flex-1">
+        {/* Demo section for AnimatedGradientBackground */}
+        <section id="demo-bg" className="relative h-screen">
+          <DemoVariant1 />
+        </section>
         <Hero />
         <TentangKami />
         <Keunggulan />
