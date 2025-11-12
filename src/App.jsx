@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Spline from '@splinetool/react-spline'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import {
   ArrowRight,
   Phone,
@@ -32,16 +32,58 @@ const Container = ({ children, className = '' }) => (
 )
 
 const SectionHeading = ({ kicker, title, subtitle }) => (
-  <div className="max-w-3xl">
+  <motion.div
+    initial={{ opacity: 0, y: 24 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.4 }}
+    transition={{ duration: 0.6 }}
+    className="max-w-3xl"
+  >
     {kicker && (
       <p className="uppercase tracking-wider font-semibold text-[#F2C335] mb-2">{kicker}</p>
     )}
-    <h2 className="text-3xl md:text-4xl font-extrabold text-[#0A2540] leading-tight">{title}</h2>
+    <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">
+      <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#0A2540] via-[#113a63] to-[#0A2540]">
+        {title}
+      </span>
+    </h2>
     {subtitle && (
       <p className="mt-3 text-slate-600 text-base md:text-lg">{subtitle}</p>
     )}
-  </div>
+  </motion.div>
 )
+
+function ScrollProgressBar() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, mass: 0.2 })
+  return (
+    <motion.div
+      style={{ scaleX }}
+      className="fixed left-0 right-0 top-0 h-[3px] origin-left z-[60]"
+    >
+      <div className="h-full w-full bg-gradient-to-r from-[#F2C335] via-[#ffd66b] to-[#F2C335]" />
+    </motion.div>
+  )
+}
+
+function FloatingBlobs() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <motion.div
+        className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(closest-side,#F2C33540,#F2C33510,transparent)' }}
+        animate={{ x: [0, 20, -10, 0], y: [0, 10, -20, 0] }}
+        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="absolute -bottom-24 -right-24 w-[520px] h-[520px] rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(closest-side,#0A254020,#0A254010,transparent)' }}
+        animate={{ x: [0, -15, 10, 0], y: [0, -10, 15, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+      />
+    </div>
+  )
+}
 
 function Navbar() {
   const links = useMemo(
@@ -58,10 +100,15 @@ function Navbar() {
   )
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/80 border-b border-slate-200">
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="fixed top-0 inset-x-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/80 border-b border-slate-200"
+    >
       <Container className="flex items-center justify-between h-16">
         <a href="#home" className="flex items-center gap-2">
-          <div className={`w-9 h-9 rounded-lg ${brand.accent} grid place-items-center`}>
+          <div className={`w-9 h-9 rounded-lg ${brand.accent} grid place-items-center shadow-[0_0_0_2px_rgba(10,37,64,.06)]`}>
             <GraduationCap className="w-5 h-5 text-[#0A2540]" />
           </div>
           <div className="leading-tight">
@@ -79,10 +126,11 @@ function Navbar() {
         <div className="flex items-center gap-3">
           <a
             href="#daftar"
-            className="hidden sm:inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#0A2540] bg-[#F2C335] hover:brightness-95 transition"
+            className="group hidden sm:inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#0A2540] bg-[#F2C335] hover:brightness-95 transition relative"
           >
-            Daftar Program
-            <ArrowRight className="w-4 h-4" />
+            <span className="absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-60 bg-[#F2C335] transition" />
+            <span className="relative">Daftar Program</span>
+            <ArrowRight className="w-4 h-4 relative" />
           </a>
           <a
             href="https://wa.me/6281234567890"
@@ -94,77 +142,116 @@ function Navbar() {
           </a>
         </div>
       </Container>
-    </header>
+    </motion.header>
   )
 }
 
 function Hero() {
+  const { scrollY } = useScroll()
+  const y = useTransform(scrollY, [0, 400], [0, 80])
+
   return (
-    <section id="home" className="relative pt-24 overflow-hidden min-h-[720px] grid place-items-center">
+    <section id="home" className="relative pt-24 overflow-hidden min-h-[780px] grid place-items-center">
+      <FloatingBlobs />
       <div className="absolute inset-0">
-        <Spline scene="https://prod.spline.design/VJLoxp84lCdVfdZu/scene.splinecode" style={{ width: '100%', height: '100%' }} />
+        <motion.div style={{ y }} className="w-full h-full">
+          <Spline scene="https://prod.spline.design/VJLoxp84lCdVfdZu/scene.splinecode" style={{ width: '100%', height: '100%' }} />
+        </motion.div>
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/70 to-white pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/70 to-white" />
 
       <Container className="relative grid lg:grid-cols-2 gap-10 items-center py-20">
         <div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7 }}
           >
             <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-[#0A2540] bg-[#F2C335]/30 rounded-full px-3 py-1 mb-4">
               <Sparkles className="w-4 h-4 text-[#F2C335]" /> Program Vokasi Digital
             </p>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-[#0A2540]">
-              SMK Bisa: Jembatan Nyata SMK dan Industri Digital
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-b from-[#0A2540] to-[#113a63]">
+                SMK Bisa: Jembatan Nyata SMK dan Industri Digital
+              </span>
             </h1>
             <p className="mt-4 text-slate-700 text-base md:text-lg">
-              Program terkurasi untuk menghubungkan siswa SMK dengan dunia industri kreatif dan teknologi. Belajar langsung dari mentor profesional, praktik proyek nyata, dan siap kerja.
+              Belajar langsung dari mentor profesional, praktik proyek nyata, dan siap kerja. Desain modern, inspiratif, dan ramah untuk generasi digital.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <a href="#daftar" className="inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-[#0A2540] bg-[#F2C335] hover:brightness-95 transition">
-                Daftar Program
-                <ArrowRight className="w-5 h-5" />
+              <a href="#daftar" className="group inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-[#0A2540] bg-[#F2C335] transition relative">
+                <span className="absolute inset-0 rounded-full blur-lg opacity-0 group-hover:opacity-80 bg-[#F2C335] transition" />
+                <span className="relative">Daftar Program</span>
+                <ArrowRight className="w-5 h-5 relative" />
               </a>
               <a href="https://wa.me/6281234567890" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white bg-[#0A2540] hover:bg-[#0b2c4c] transition">
                 Konsultasi Gratis
                 <Phone className="w-5 h-5" />
               </a>
             </div>
-            <div className="mt-6 grid grid-cols-3 gap-4">
+            <motion.div className="mt-6 grid grid-cols-3 gap-4"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.6 }}
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+            >
               {[
                 { label: 'Mentor Profesional', icon: BadgeCheck },
                 { label: 'Proyek Nyata', icon: Briefcase },
                 { label: 'Sertifikat Industri', icon: Crown }
               ].map((f) => (
-                <div key={f.label} className="flex items-center gap-2 text-sm text-[#0A2540]">
+                <motion.div key={f.label} variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 text-sm text-[#0A2540]">
                   <f.icon className="w-4 h-4 text-[#F2C335]" /> {f.label}
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
-        <div className="relative hidden lg:block h-[480px]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98, y: 10 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.6 }}
+          className="relative hidden lg:block h-[520px]"
+        >
           <div className="absolute inset-0 rounded-2xl border border-slate-200 bg-white/60 backdrop-blur shadow-xl" />
-          <div className="absolute -inset-6 bg-gradient-to-tr from-[#F2C335]/0 via-[#F2C335]/20 to-transparent rounded-3xl blur-2xl pointer-events-none" />
-        </div>
+          <div className="absolute -inset-6 bg-gradient-to-tr from-[#F2C335]/0 via-[#F2C335]/25 to-transparent rounded-3xl blur-2xl pointer-events-none" />
+        </motion.div>
       </Container>
+
+      <motion.a
+        href="#daftar"
+        className="group fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full px-5 py-3 font-semibold text-[#0A2540] bg-[#F2C335] shadow-xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+      >
+        <span className="absolute inset-0 rounded-full blur-md opacity-60 bg-[#F2C335]" />
+        <span className="relative">Daftar Sekarang</span>
+        <ArrowRight className="w-4 h-4 relative" />
+      </motion.a>
     </section>
   )
 }
 
 function TentangKami() {
   return (
-    <section id="tentang" className="py-16 md:py-24 bg-white">
-      <Container className="grid lg:grid-cols-2 gap-12 items-start">
+    <section id="tentang" className="py-16 md:py-24 bg-white relative">
+      <FloatingBlobs />
+      <Container className="grid lg:grid-cols-2 gap-12 items-start relative">
         <SectionHeading
           kicker="Tentang Kami"
           title="Divisi Vokasi Digital dari ALC Group"
           subtitle="Kami menghadirkan kurikulum kekinian yang relevan dengan kebutuhan industri, dipandu mentor berpengalaman, dan berbasis proyek nyata. Fokus kami: membangun talenta siap kerja dari bangku SMK."
         />
-        <div className="grid gap-5">
+        <motion.div
+          className="grid gap-5"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
             <h3 className="font-semibold text-[#0A2540] mb-1">Visi</h3>
             <p className="text-slate-700">Menjadi penghubung utama antara pendidikan vokasi SMK dan industri digital Indonesia.</p>
@@ -177,7 +264,7 @@ function TentangKami() {
               <li>Memperkuat kolaborasi sekolah–industri untuk penyerapan tenaga kerja.</li>
             </ul>
           </div>
-        </div>
+        </motion.div>
       </Container>
     </section>
   )
@@ -206,17 +293,29 @@ function Keunggulan() {
           title="Kenapa Memilih SMK Bisa"
           subtitle="Kami merancang pengalaman belajar yang relevan, disiplin, dan menyenangkan—berorientasi hasil."
         />
-        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        <motion.div
+          className="mt-10 grid sm:grid-cols-2 lg:grid-cols-5 gap-5"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+        >
           {items.map((it) => (
-            <div key={it.title} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className={`w-10 h-10 rounded-lg ${brand.accent} grid place-items-center mb-3`}>
+            <motion.div
+              key={it.title}
+              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+              whileHover={{ y: -6, scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 16 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            >
+              <div className={`w-10 h-10 rounded-lg ${brand.accent} grid place-items-center mb-3 shadow-inner`}>
                 <it.icon className="w-5 h-5 text-[#0A2540]" />
               </div>
               <h3 className="font-semibold text-[#0A2540]">{it.title}</h3>
               <p className="text-sm text-slate-600 mt-1">{it.desc}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         <div className="mt-10 flex flex-wrap items-center gap-3">
           {highlights.map((h) => (
@@ -260,9 +359,17 @@ function ProgramUtama() {
               desc: 'Sesi inspiratif dari pelaku industri dan modul kewirausahaan digital untuk siswa.',
               metas: ['Workshop onsite/online', 'Studi kasus industri', 'Sertifikat keikutsertaan']
             }
-          ].map((p) => (
-            <div key={p.title} className="rounded-2xl border border-slate-200 p-6 bg-slate-50">
-              <div className={`w-12 h-12 rounded-xl ${brand.accent} grid place-items-center mb-4`}>
+          ].map((p, idx) => (
+            <motion.div
+              key={p.title}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4, delay: idx * 0.05 }}
+              whileHover={{ y: -6 }}
+              className="rounded-2xl border border-slate-200 p-6 bg-slate-50 shadow-sm"
+            >
+              <div className={`w-12 h-12 rounded-xl ${brand.accent} grid place-items-center mb-4 shadow-inner`}>
                 <p.icon className="w-6 h-6 text-[#0A2540]" />
               </div>
               <h3 className="text-xl font-semibold text-[#0A2540]">{p.title}</h3>
@@ -272,11 +379,31 @@ function ProgramUtama() {
                   <li key={m}>{m}</li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
         </div>
       </Container>
     </section>
+  )
+}
+
+function MarqueePartners() {
+  const partners = ['Safwan Qur\'an', 'SMK DT Aa Gym', 'PT Skinsol', 'ALC Group', 'Tech Creative Studio', 'Media Kreasi', 'Startup Lokal']
+  const row = [...partners, ...partners]
+  return (
+    <div className="relative overflow-hidden">
+      <motion.div
+        className="flex gap-6 py-2"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: 18, ease: 'linear', repeat: Infinity }}
+      >
+        {row.map((p, i) => (
+          <div key={p + i} className="rounded-xl border border-slate-200 px-5 py-3 text-center bg-slate-50 text-[#0A2540] font-semibold min-w-[220px]">
+            {p}
+          </div>
+        ))}
+      </motion.div>
+    </div>
   )
 }
 
@@ -297,20 +424,29 @@ function AktivitasGaleri() {
           title="Kolaborasi, Workshop, dan Kegiatan Magang"
           subtitle="Potret proses belajar dan karya siswa bersama mitra industri."
         />
-        <div className="mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <motion.div
+          className="mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-4"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+        >
           {imgs.map((src, i) => (
-            <figure key={src} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <img src={src} alt={`Galeri ${i + 1}`} className="w-full h-56 object-cover hover:scale-105 transition-transform duration-300" />
-            </figure>
+            <motion.figure
+              key={src}
+              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-white group"
+            >
+              <img src={src} alt={`Galeri ${i + 1}`} className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500" />
+            </motion.figure>
           ))}
-        </div>
+        </motion.div>
       </Container>
     </section>
   )
 }
 
 function Mitra() {
-  const partners = ['Safwan Qur\'an', 'SMK DT Aa Gym', 'PT Skinsol', 'ALC Group', 'Tech Creative Studio']
   return (
     <section id="mitra" className="py-16 md:py-24 bg-white">
       <Container>
@@ -319,15 +455,11 @@ function Mitra() {
           title="Berkolaborasi dengan Sekolah dan Industri"
           subtitle="Mari jembatani kebutuhan kurikulum dan dunia kerja. Kami terbuka bagi mitra baru."
         />
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {partners.map((p) => (
-            <div key={p} className="rounded-xl border border-slate-200 p-4 text-center bg-slate-50 text-[#0A2540] font-semibold">
-              {p}
-            </div>
-          ))}
+        <div className="mt-6">
+          <MarqueePartners />
         </div>
         <div className="mt-8">
-          <a href="https://wa.me/6281234567890" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-[#0A2540] bg-[#F2C335] font-semibold hover:brightness-95">
+          <a href="https://wa.me/6281234567890" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-[#0A2540] bg-[#F2C335] font-semibold hover:brightness-95 shadow">
             Ajak Kolaborasi Sekarang
             <Rocket className="w-5 h-5" />
           </a>
@@ -364,7 +496,14 @@ function Testimoni() {
         <SectionHeading kicker="Testimoni" title="Apa Kata Siswa dan Guru" />
         <div className="mt-10 grid md:grid-cols-3 gap-6">
           {items.map((t, i) => (
-            <blockquote key={i} className="rounded-2xl border border-slate-200 bg-white p-6">
+            <motion.blockquote
+              key={i}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.4 }}
+              className="rounded-2xl border border-slate-200 bg-white p-6"
+            >
               <Quote className="w-6 h-6 text-[#F2C335]" />
               <p className="mt-3 text-slate-700">“{t.quote}”</p>
               <div className="mt-4 flex items-center gap-3">
@@ -376,11 +515,33 @@ function Testimoni() {
                   <div className="text-sm text-slate-500">{t.role}</div>
                 </div>
               </div>
-            </blockquote>
+            </motion.blockquote>
           ))}
         </div>
       </Container>
     </section>
+  )
+}
+
+function CountUpNumber({ to, label }) {
+  const [value, setValue] = useState(0)
+  useEffect(() => {
+    let raf
+    const duration = 1400
+    const start = performance.now()
+    const animate = (t) => {
+      const p = Math.min(1, (t - start) / duration)
+      setValue(Math.floor(to * (0.2 + 0.8 * p)))
+      if (p < 1) raf = requestAnimationFrame(animate)
+    }
+    raf = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(raf)
+  }, [to])
+  return (
+    <div className="rounded-xl bg-white p-4 border border-slate-200 text-center shadow-sm">
+      <div className="text-2xl font-extrabold text-[#0A2540]">{value.toString()}</div>
+      <div className="text-xs text-slate-500">{label}</div>
+    </div>
   )
 }
 
@@ -394,7 +555,13 @@ function OutputProgram() {
           subtitle="Kami menargetkan pencapaian konkret sebagai indikator kesiapan kerja."
         />
         <div className="mt-10 grid lg:grid-cols-2 gap-8">
-          <div className="rounded-2xl border border-slate-200 p-6 bg-slate-50">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.5 }}
+            className="rounded-2xl border border-slate-200 p-6 bg-slate-50 shadow-sm"
+          >
             <h3 className="font-semibold text-[#0A2540] flex items-center gap-2">
               <Star className="w-5 h-5 text-[#F2C335]" /> Infografik Hasil Program
             </h3>
@@ -404,19 +571,18 @@ function OutputProgram() {
               <li>Tim kecil yang berfungsi layaknya squad industri.</li>
             </ul>
             <div className="mt-5 grid grid-cols-3 gap-4">
-              {[
-                { k: '60JT+', l: 'Omzet/akun' },
-                { k: '6 BLN', l: 'Durasi pencapaian' },
-                { k: '10+', l: 'Proyek nyata' }
-              ].map((m) => (
-                <div key={m.k} className="rounded-xl bg-white p-4 border border-slate-200 text-center">
-                  <div className="text-2xl font-extrabold text-[#0A2540]">{m.k}</div>
-                  <div className="text-xs text-slate-500">{m.l}</div>
-                </div>
-              ))}
+              <CountUpNumber to={60} label="Omzet/akun (JT)" />
+              <CountUpNumber to={6} label="Durasi (Bulan)" />
+              <CountUpNumber to={10} label="Proyek Nyata" />
             </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-6 bg-slate-50">
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="rounded-2xl border border-slate-200 p-6 bg-slate-50 shadow-sm"
+          >
             <h3 className="font-semibold text-[#0A2540] flex items-center gap-2">
               <BadgeCheck className="w-5 h-5 text-[#F2C335]" /> Skill yang Didapat
             </h3>
@@ -431,12 +597,16 @@ function OutputProgram() {
                 'Growth Mindset & Disiplin',
                 'Digitalpreneurship'
               ].map((s) => (
-                <div key={s} className="px-4 py-3 rounded-xl bg-white border border-slate-200 text-[#0A2540] text-sm font-medium">
+                <motion.div
+                  key={s}
+                  whileHover={{ scale: 1.02 }}
+                  className="px-4 py-3 rounded-xl bg-white border border-slate-200 text-[#0A2540] text-sm font-medium shadow-sm"
+                >
                   {s}
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </Container>
     </section>
@@ -459,10 +629,11 @@ function AjakanBergabung() {
             href="https://forms.gle/example"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-[#0A2540] bg-[#F2C335] hover:brightness-95"
+            className="group inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-[#0A2540] bg-[#F2C335] relative"
           >
-            Daftar Sekarang
-            <ArrowRight className="w-5 h-5" />
+            <span className="absolute inset-0 rounded-full blur-lg opacity-80 bg-[#F2C335]" />
+            <span className="relative">Daftar Sekarang</span>
+            <ArrowRight className="w-5 h-5 relative" />
           </a>
           <a
             href="https://wa.me/6281234567890"
@@ -520,7 +691,7 @@ function ClockIcon(props) {
   return (
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0A2540" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <circle cx="12" cy="12" r="10" />
-      <path dName="M12 6v6l4 2" d="M12 6v6l4 2" />
+      <path d="M12 6v6l4 2" />
     </svg>
   )
 }
@@ -535,6 +706,7 @@ function ShieldIcon(props) {
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollProgressBar />
       <Navbar />
       <main className="flex-1">
         <Hero />
