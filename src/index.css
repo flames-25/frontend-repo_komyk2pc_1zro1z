@@ -10,6 +10,11 @@
     --font-mona: 'Mona Sans', system-ui, sans-serif;
     --font-ibm-plex: 'IBM Plex Sans', system-ui, sans-serif;
     --font-manrope: 'Manrope', system-ui, sans-serif;
+
+    /* Brand */
+    --navy: #0A2540;
+    --gold: #F2C335;
+    --slate: #0d1b2a;
   }
 
   html {
@@ -22,8 +27,44 @@
   }
 }
 
-/* Custom utility classes for shadcn/ui patterns */
+/* Elevated background: animated cosmic gradient + subtle grid */
 @layer utilities {
+  .cosmic-bg {
+    position: relative;
+    background: radial-gradient(1200px 800px at 10% -10%, rgba(242,195,53,0.18), transparent),
+                radial-gradient(900px 500px at 110% 10%, rgba(17,58,99,0.24), transparent),
+                radial-gradient(900px 700px at 50% 120%, rgba(10,37,64,0.85), rgba(10,37,64,0.92));
+    overflow: clip;
+  }
+  .cosmic-bg::before {
+    content: '';
+    position: fixed;
+    inset: -20% -10% -10% -10%;
+    background: conic-gradient(from 90deg at 50% 50%, rgba(242,195,53,0.14), rgba(10,37,64,0.2), transparent 60%);
+    filter: blur(60px);
+    animation: aurora-spin 28s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .cosmic-bg::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 28px 28px, 28px 28px;
+    mask-image: radial-gradient(70% 60% at 50% 10%, black, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @keyframes aurora-spin {
+    0% { transform: translate3d(-3%, -2%, 0) rotate(0deg) scale(1); }
+    50% { transform: translate3d(3%, 1%, 0) rotate(8deg) scale(1.05); }
+    100% { transform: translate3d(-2%, 3%, 0) rotate(-6deg) scale(1.02); }
+  }
+
   .animate-in {
     animation-name: animateIn;
     animation-duration: 350ms;
